@@ -1,0 +1,20 @@
+name: EventoBot
+version: 1.0.0
+main: br.com.asthen.eventobot.EventoBotPlugin
+api-version: '26.1'
+description: Aldeão de eventos com mundo carregado sob demanda e contagem regressiva.
+
+commands:
+  event:
+    description: Controla o evento (abrir, fechar, contagem e posição do aldeão).
+    usage: /event <on|off|time|setnpc|status>
+    aliases: [evento]
+    permission: eventobot.admin
+
+permissions:
+  eventobot.admin:
+    description: Permite usar o comando /event.
+    default: op
+  eventobot.bypass:
+    description: Permite entrar no evento pelo aldeão mesmo com o evento fechado.
+    default: op
