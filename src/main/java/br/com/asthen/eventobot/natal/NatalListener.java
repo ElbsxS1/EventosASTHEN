@@ -37,7 +37,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerSwapHandItemEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -294,7 +294,7 @@ final class NatalListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void aoTrocarMao(PlayerSwapHandItemEvent e) {
+    public void aoTrocarMao(PlayerSwapHandItemsEvent e) {
         if (m.restrito(e.getPlayer())) {
             e.setCancelled(true);
         }
