@@ -26,7 +26,7 @@ final class NatalComando implements CommandExecutor, TabCompleter {
     private static final List<String> ADMIN_SUBS = List.of(
             "painel", "setranking", "removeranking", "iniciar", "amarelo", "vermelho", "verde", "azul", "preparar", "liberar", "status", "times",
             "participantes", "ativos", "espectadores", "encerrarrodada", "cancelarrodada", "cancelar",
-            "encerrar", "remover", "setlobby", "setentrada", "setspawn", "setespectador", "zerarranking");
+            "encerrar", "remover", "resetar", "setlobby", "setentrada", "setspawn", "setespectador", "zerarranking");
     private static final List<String> JOGADOR_SUBS = List.of("ajuda", "sair", "ranking", "time");
 
     private final NatalModule m;
@@ -64,6 +64,7 @@ final class NatalComando implements CommandExecutor, TabCompleter {
         s.sendMessage(NatalModule.texto("§e/natal times §7- jogadores de cada time (registrados/presentes)"));
         s.sendMessage(NatalModule.texto("§e/natal participantes|ativos|espectadores §7- listas"));
         s.sendMessage(NatalModule.texto("§e/natal remover <jogador> §7- tira o time de um jogador"));
+        s.sendMessage(NatalModule.texto("§e/natal resetar <jogador> §7- tira de espectador e volta a jogador"));
         s.sendMessage(NatalModule.texto("§e/natal zerarranking confirmar §7- apaga o ranking do Natal"));
         s.sendMessage(NatalModule.texto("§7Estado atual: §f" + m.estado.rotulo));
     }
@@ -176,6 +177,7 @@ final class NatalComando implements CommandExecutor, TabCompleter {
             case "ativos" -> listar(s, "Jogadores ativos", Status.ATIVO);
             case "espectadores" -> listarEspectadores(s);
             case "remover" -> remover(s, args);
+            case "resetar" -> resetar(s, args);
             case "setlobby" -> posicao(s, "lobby", "Lobby do evento");
             case "setentrada" -> posicao(s, "entrada", "Spawn de entrada");
             case "setespectador" -> posicao(s, "espectador", "Ponto dos espectadores");
@@ -245,10 +247,23 @@ final class NatalComando implements CommandExecutor, TabCompleter {
             return;
         }
         OfflinePlayer off = Bukkit.getOfflinePlayer(args[1]);
-        if (m.removerDoTime(off.getUniqueId())) {
+        if (m.removerDoTimeForcado(off.getUniqueId())) {
             m.enviar(s, "§aO jogador " + args[1] + " foi tirado do time e pode escolher de novo.");
         } else {
             m.enviar(s, "§cNão deu para remover (sem time, desconhecido ou dentro de uma rodada).");
+        }
+    }
+
+    private void resetar(CommandSender s, String[] args) {
+        if (args.length < 2) {
+            m.enviar(s, "§cUso: /natal resetar <jogador>");
+            return;
+        }
+        OfflinePlayer off = Bukkit.getOfflinePlayer(args[1]);
+        if (m.resetarJogador(off.getUniqueId())) {
+            m.enviar(s, "§a" + args[1] + " voltou a ser jogador (lobby do evento), mantendo o time.");
+        } else {
+            m.enviar(s, "§cJogador não está registrado no evento.");
         }
     }
 
@@ -352,7 +367,7 @@ final class NatalComando implements CommandExecutor, TabCompleter {
                 adicionar(out, List.of("1", "2"), args[1]);
             } else if (sub.equals("encerrarrodada")) {
                 adicionar(out, List.of("amarelo", "vermelho", "verde", "azul"), args[1]);
-            } else if (sub.equals("remover")) {
+            } else if (sub.equals("remover") || sub.equals("resetar")) {
                 for (Player p : Bukkit.getOnlinePlayers()) {
                     adicionar(out, List.of(p.getName()), args[1]);
                 }

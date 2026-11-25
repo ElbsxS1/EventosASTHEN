@@ -260,7 +260,11 @@ final class NatalListener implements Listener {
         if (e.getWhoClicked() instanceof Player adm && m.painel.ehPainel(e.getView().getTopInventory())) {
             e.setCancelled(true);
             if (m.admin(adm) && e.getClickedInventory() == e.getView().getTopInventory()) {
-                m.painel.aoClicar(adm, e.getSlot(), e.isShiftClick());
+                if (e.getView().getTopInventory().getHolder(false) instanceof NatalPainel.JHolder jh) {
+                    m.painel.aoClicarJogadores(adm, jh, e.getSlot(), e.isRightClick());
+                } else {
+                    m.painel.aoClicar(adm, e.getSlot(), e.isShiftClick());
+                }
             }
             return;
         }

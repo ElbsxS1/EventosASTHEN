@@ -11,6 +11,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.OfflinePlayer;
+import java.util.Map;
+import java.util.UUID;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +31,16 @@ final class NatalPainel {
         }
     }
 
+    static final class JHolder implements InventoryHolder {
+        Inventory inv;
+        final List<UUID> ids = new ArrayList<>();
+
+        @Override
+        public Inventory getInventory() {
+            return inv;
+        }
+    }
+
     private static final int[] ENC = {37, 38, 39, 40};
 
     private final NatalModule m;
@@ -36,7 +50,7 @@ final class NatalPainel {
     }
 
     boolean ehPainel(Inventory inv) {
-        return inv != null && inv.getHolder(false) instanceof Holder;
+        return inv != null && (inv.getHolder(false) instanceof Holder || inv.getHolder(false) instanceof JHolder);
     }
 
     private static Component t(String legado) {
@@ -98,6 +112,8 @@ final class NatalPainel {
         colocar(inv, 46, Material.SHEARS, "§cRemover ranking flutuante");
         colocar(inv, 47, Material.TNT, "§4Zerar ranking de kills", "§7Use SHIFT + clique");
         colocar(inv, 49, Material.BOOK, "§bLista de times", "§7Clique: mostra no chat");
+        colocar(inv, 51, Material.PLAYER_HEAD, "§dJogadores: resetar / remover do time",
+                "§7Tirar do espectador ou do time", "§7Clique para abrir a lista");
         colocar(inv, 53, Material.ARROW, "§7Fechar");
         p.openInventory(inv);
     }
@@ -143,6 +159,10 @@ final class NatalPainel {
                 }
             }
             case 49 -> p.performCommand("natal times");
+            case 51 -> {
+                abrirJogadores(p);
+                return;
+            }
             case 53 -> {
                 p.closeInventory();
                 return;
@@ -154,6 +174,63 @@ final class NatalPainel {
         if (p.isOnline() && p.getOpenInventory().getTopInventory().getHolder(false) instanceof Holder) {
             abrir(p);
         }
+    }
+
+    // ------------------------------------------------------------------ lista de jogadores
+
+    void abrirJogadores(Player p) {
+        JHolder h = new JHolder();
+        Inventory inv = Bukkit.createInventory(h, 54, Component.text("Jogadores do Natal", NamedTextColor.DARK_PURPLE));
+        h.inv = inv;
+        int slot = 0;
+        for (Map.Entry<UUID, NatalModule.Participante> e : m.participantes.entrySet()) {
+            if (slot >= 45) {
+                break;
+            }
+            OfflinePlayer off = Bukkit.getOfflinePlayer(e.getKey());
+            NatalModule.Participante pt = e.getValue();
+            ItemStack it = new ItemStack(Material.PLAYER_HEAD);
+            SkullMeta meta = (SkullMeta) it.getItemMeta();
+            meta.setOwningPlayer(off);
+            meta.displayName(t((pt.time != null ? pt.time.codigo : "§7") + (off.getName() != null ? off.getName() : "?")));
+            List<Component> lore = new ArrayList<>();
+            lore.add(t("§7Time: " + (pt.time != null ? pt.time.colorido() : "§8nenhum")));
+            lore.add(t("§7Status: §f" + pt.status.name().toLowerCase(java.util.Locale.ROOT)
+                    + (off.isOnline() ? "" : " §8(offline)")));
+            lore.add(t(" "));
+            lore.add(t("§aClique esquerdo: voltar a jogador"));
+            lore.add(t("§cClique direito: remover do time"));
+            meta.lore(lore);
+            it.setItemMeta(meta);
+            inv.setItem(slot++, it);
+            h.ids.add(e.getKey());
+        }
+        if (h.ids.isEmpty()) {
+            colocar(inv, 22, Material.BARRIER, "§7Ninguém registrado ainda");
+        }
+        colocar(inv, 49, Material.ARROW, "§7Voltar ao painel");
+        p.openInventory(inv);
+    }
+
+    void aoClicarJogadores(Player p, JHolder h, int slot, boolean direito) {
+        if (slot == 49) {
+            abrir(p);
+            return;
+        }
+        if (slot < 0 || slot >= h.ids.size()) {
+            return;
+        }
+        UUID id = h.ids.get(slot);
+        OfflinePlayer off = Bukkit.getOfflinePlayer(id);
+        String nome = off.getName() != null ? off.getName() : "?";
+        if (direito) {
+            m.enviar(p, m.removerDoTimeForcado(id) ? "§a" + nome + " foi removido do time."
+                    : "§cNão deu para remover " + nome + " do time.");
+        } else {
+            m.enviar(p, m.resetarJogador(id) ? "§a" + nome + " voltou a ser jogador (lobby do evento)."
+                    : "§cJogador desconhecido.");
+        }
+        abrirJogadores(p);
     }
 
     private void ponto(Player p, String chave, String nome) {

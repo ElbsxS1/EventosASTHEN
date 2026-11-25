@@ -109,6 +109,7 @@ final class NatalPlacar {
             }
             team.color(t.cor);
             team.prefix(Component.text("[" + t.nome + "] ", t.cor));
+            team.setOption(Team.Option.NAME_TAG_VISIBILITY, nomeVisivel());
             Set<String> desejados = new HashSet<>();
             for (Player p : m.presentes(t)) {
                 desejados.add(p.getName());
@@ -124,6 +125,40 @@ final class NatalPlacar {
                 }
             }
         }
+        // Quem está no evento sem time também tem o nome escondido durante a rodada.
+        Team sem = sb.getTeam("natal_sem");
+        if (sem == null) {
+            sem = sb.registerNewTeam("natal_sem");
+        }
+        sem.setOption(Team.Option.NAME_TAG_VISIBILITY, nomeVisivel());
+        Set<String> comTime = new HashSet<>();
+        for (Time t : Time.values()) {
+            for (Player p : m.presentes(t)) {
+                comTime.add(p.getName());
+            }
+        }
+        Set<String> semTime = new HashSet<>();
+        for (UUID id : placares.keySet()) {
+            Player p = Bukkit.getPlayer(id);
+            if (p != null && !comTime.contains(p.getName())) {
+                semTime.add(p.getName());
+            }
+        }
+        for (String entrada : new ArrayList<>(sem.getEntries())) {
+            if (!semTime.contains(entrada)) {
+                sem.removeEntry(entrada);
+            }
+        }
+        for (String nome : semTime) {
+            if (!sem.hasEntry(nome)) {
+                sem.addEntry(nome);
+            }
+        }
+    }
+
+    /** Durante a rodada o nome sobre a cabeça fica escondido para todos. */
+    private Team.OptionStatus nomeVisivel() {
+        return m.estado.emRodada() ? Team.OptionStatus.NEVER : Team.OptionStatus.ALWAYS;
     }
 
     private boolean daRodada(Time t) {

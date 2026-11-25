@@ -696,6 +696,41 @@ public final class NatalModule {
         return true;
     }
 
+    /**
+     * Admin: tira o jogador de espectador/eliminado (ou da rodada) e o devolve ao lobby do evento como
+     * jogador comum, mantendo o time.
+     */
+    boolean resetarJogador(UUID id) {
+        Participante pt = participantes.get(id);
+        if (pt == null) {
+            return false;
+        }
+        boolean estavaNaRodada = pt.naRodada;
+        pt.status = Status.LOBBY;
+        pt.hits = 0;
+        pt.naRodada = false;
+        Player p = Bukkit.getPlayer(id);
+        if (p != null && noEvento.contains(id)) {
+            darKitLobby(p, pt);
+            normalizar(p);
+            tp(p, destinoLobby());
+        }
+        atualizarVisual();
+        if (estavaNaRodada) {
+            verificarFim();
+        }
+        return true;
+    }
+
+    /** Admin: tira o jogador do time (se estava numa rodada, ele sai dela primeiro). */
+    boolean removerDoTimeForcado(UUID id) {
+        if (!participantes.containsKey(id)) {
+            return false;
+        }
+        resetarJogador(id);
+        return removerDoTime(id);
+    }
+
     // ------------------------------------------------------------------ administração das rodadas
 
     void abrirSelecao(CommandSender s) {
@@ -944,6 +979,12 @@ public final class NatalModule {
         alvo.playSound(alvo.getLocation(), Sound.ENTITY_PLAYER_HURT, 1f, 1.3f);
         atacante.sendActionBar(texto("§aAcerto em §f" + alvo.getName() + " §7(" + Math.min(pt.hits, total) + "/" + total + ")"));
         alvo.sendActionBar(texto("§cVocê foi atingido por §f" + atacante.getName() + " §7(" + Math.min(pt.hits, total) + "/" + total + ")"));
+        if (pt.hits < total) {
+            alvo.showTitle(Title.title(Component.text("⚠ ATINGIDO!", NamedTextColor.RED),
+                    Component.text("Acertos: " + pt.hits + "/" + total, NamedTextColor.YELLOW),
+                    Title.Times.times(java.time.Duration.ZERO, java.time.Duration.ofMillis(800),
+                            java.time.Duration.ofMillis(200))));
+        }
         if (pt.hits >= total) {
             eliminar(alvo, alvo.getUniqueId(), pt, atacante, pa, "acerto");
         }
