@@ -53,6 +53,8 @@ import java.util.UUID;
  */
 final class NatalListener implements Listener {
 
+    private static final List<String> SEMPRE_BLOQUEADOS = List.of("lobby", "hub", "lob", "spawn", "l");
+
     private final NatalModule m;
 
     NatalListener(NatalModule m) {
@@ -388,6 +390,21 @@ final class NatalListener implements Listener {
         }
         Command cmd = Bukkit.getCommandMap().getCommand(base);
         String nome = cmd != null ? cmd.getName().toLowerCase(Locale.ROOT) : base;
+        // Comandos de saída para o lobby ficam sempre bloqueados (mesmo que o config os libere):
+        // quem quiser sair usa /natal sair.
+        java.util.Set<String> nomes = new java.util.HashSet<>(List.of(base, nome));
+        if (cmd != null) {
+            for (String a : cmd.getAliases()) {
+                nomes.add(a.toLowerCase(Locale.ROOT));
+            }
+        }
+        for (String bloqueado : SEMPRE_BLOQUEADOS) {
+            if (nomes.contains(bloqueado)) {
+                e.setCancelled(true);
+                p.sendMessage(NatalModule.texto("§cVocê não pode sair assim durante o evento. Use §e/natal sair§c."));
+                return;
+            }
+        }
         List<String> permitidos = m.comandosPermitidos();
         for (String permitido : permitidos) {
             String a = permitido.toLowerCase(Locale.ROOT);

@@ -35,4 +35,4 @@ natal:
   ranking-top: 3
   holograma-top: 10
   # Comandos liberados para jogadores comuns dentro do evento (administradores são isentos).
-  comandos-permitidos: [natal, lob, msg, tell, w, r, help]
+  comandos-permitidos: [natal, msg, tell, w, r, help]
