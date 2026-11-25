@@ -58,6 +58,8 @@ public final class NatalModule {
     final InventarioIsolado inventarios;
     final NatalPlacar placar;
     final NatalMenu menu;
+    final NatalPainel painel;
+    final NatalHolograma holo;
     final NamespacedKey chaveItem;
     final NamespacedKey chaveRodada;
 
@@ -88,6 +90,8 @@ public final class NatalModule {
         this.inventarios = new InventarioIsolado(plugin.getDataFolder(), plugin.getLogger());
         this.placar = new NatalPlacar(this);
         this.menu = new NatalMenu(this);
+        this.painel = new NatalPainel(this);
+        this.holo = new NatalHolograma(this);
         carregarDados();
     }
 
@@ -107,10 +111,12 @@ public final class NatalModule {
         }
         plugin.getServer().getPluginManager().registerEvents(new NatalListener(this), plugin);
         tarefa = plugin.getServer().getScheduler().runTaskTimer(plugin, this::tick, 20L, 10L);
+        holo.iniciar();
     }
 
     /** Ao desligar o servidor/plugin: devolve inventários de quem está no evento e salva tudo. */
     public void desligar() {
+        holo.parar();
         if (tarefa != null) {
             tarefa.cancel();
         }
@@ -180,6 +186,10 @@ public final class NatalModule {
 
     int bolinhasPorPilha() {
         return Math.max(1, Math.min(64, plugin.getConfig().getInt("natal.bolinhas-por-pilha", 16)));
+    }
+
+    int holoTop() {
+        return plugin.getConfig().getInt("natal.holograma-top", 10);
     }
 
     int rankingTop() {

@@ -255,6 +255,13 @@ final class NatalListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void aoClicarInventario(InventoryClickEvent e) {
+        if (e.getWhoClicked() instanceof Player adm && m.painel.ehPainel(e.getView().getTopInventory())) {
+            e.setCancelled(true);
+            if (m.admin(adm) && e.getClickedInventory() == e.getView().getTopInventory()) {
+                m.painel.aoClicar(adm, e.getSlot(), e.isShiftClick());
+            }
+            return;
+        }
         if (!(e.getWhoClicked() instanceof Player p) || !m.restrito(p)) {
             return;
         }
@@ -267,14 +274,15 @@ final class NatalListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void aoArrastar(InventoryDragEvent e) {
-        if (e.getWhoClicked() instanceof Player p && m.restrito(p)) {
+        if (m.painel.ehPainel(e.getView().getTopInventory())
+                || e.getWhoClicked() instanceof Player p && m.restrito(p)) {
             e.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void aoAbrirInventario(InventoryOpenEvent e) {
-        if (e.getPlayer() instanceof Player p && m.restrito(p) && !m.menu.ehMenu(e.getInventory())) {
+        if (e.getPlayer() instanceof Player p && m.restrito(p) && !m.menu.ehMenu(e.getInventory()) && !m.painel.ehPainel(e.getInventory())) {
             e.setCancelled(true); // baús, ender chest, shulker, bancadas...
         }
     }
