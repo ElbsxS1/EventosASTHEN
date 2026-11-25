@@ -10,8 +10,13 @@ commands:
     usage: /event <on|off|time|setnpc|status>
     aliases: [evento]
     permission: eventobot.admin
-
+  natal:
+    description: Evento de Natal (times, rodadas de bolinha de neve).
+    usage: /natal <sair|ranking|time|ajuda>
 permissions:
+  eventobot.natal.admin:
+    description: Administra o Evento de Natal.
+    default: op
   eventobot.admin:
     description: Permite usar o comando /event.
     default: op

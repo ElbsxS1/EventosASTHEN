@@ -19,3 +19,19 @@ mensagens:
   evento-agendado: "&eO evento começa em &f{tempo}&e."
   evento-aberto: "&aO evento começou! Fale com o aldeão no lobby para entrar."
   evento-encerrado: "&eO evento foi encerrado. Você voltou ao lobby."
+
+# ---------------------------------------------------------------- Evento de Natal
+# Qual evento está ativo neste momento (só um por vez; Carnaval será independente).
+evento-ativo: natal
+
+natal:
+  max-por-time: 4
+  acertos-para-eliminar: 3
+  min-jogadores-por-time: 1
+  raio-preparacao: 3.0
+  contagem-inicio: 5
+  recarga-bolinha-ticks: 5
+  bolinhas-por-pilha: 16
+  ranking-top: 3
+  # Comandos liberados para jogadores comuns dentro do evento (administradores são isentos).
+  comandos-permitidos: [natal, lob, msg, tell, w, r, help]

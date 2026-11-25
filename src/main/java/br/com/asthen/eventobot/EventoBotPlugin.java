@@ -63,6 +63,7 @@ public final class EventoBotPlugin extends JavaPlugin {
     private float npcPitch;
 
     private World mundoEvento;
+    private br.com.asthen.eventobot.natal.NatalModule natal;
     private Villager npc;
     private String ultimoNome = "";
 
@@ -80,6 +81,8 @@ public final class EventoBotPlugin extends JavaPlugin {
         pc.setExecutor(comando);
         pc.setTabCompleter(comando);
         getServer().getPluginManager().registerEvents(new NpcListener(this), this);
+        natal = new br.com.asthen.eventobot.natal.NatalModule(this);
+        natal.registrar();
 
         // Espera um tick para os mundos do servidor terminarem de carregar.
         getServer().getScheduler().runTask(this, this::iniciar);
@@ -87,6 +90,9 @@ public final class EventoBotPlugin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (natal != null) {
+            natal.desligar();
+        }
         if (tarefa != null) {
             tarefa.cancel();
         }
@@ -162,6 +168,9 @@ public final class EventoBotPlugin extends JavaPlugin {
         restante = 0;
         salvarDados();
         atualizarNome();
+        if (natal != null) {
+            natal.aoEventoFechado();
+        }
 
         World w = mundoEventoCarregado();
         if (w == null) {
@@ -282,6 +291,18 @@ public final class EventoBotPlugin extends JavaPlugin {
 
     // ------------------------------------------------------------------ mundo do evento
 
+    public World getMundoEvento() {
+        return mundoEventoCarregado();
+    }
+
+    public Location lobbyPrincipal() {
+        return destinoRetorno();
+    }
+
+    public br.com.asthen.eventobot.natal.NatalModule natal() {
+        return natal;
+    }
+
     World mundoEventoCarregado() {
         if (mundoEvento != null && Bukkit.getWorld(mundoEvento.getUID()) != null) {
             return mundoEvento;
@@ -351,6 +372,9 @@ public final class EventoBotPlugin extends JavaPlugin {
         List<CompletableFuture<Boolean>> futuros = new ArrayList<>();
         for (Player p : new ArrayList<>(mundo.getPlayers())) {
             p.sendMessage(mensagem("evento-encerrado", ""));
+            if (natal != null) {
+                natal.permitirSaida(p);
+            }
             futuros.add(p.teleportAsync(destino));
         }
         if (futuros.isEmpty()) {

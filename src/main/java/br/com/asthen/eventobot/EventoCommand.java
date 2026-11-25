@@ -30,6 +30,7 @@ final class EventoCommand implements CommandExecutor, TabCompleter {
             case "off" -> plugin.desligar(sender);
             case "time" -> tempo(sender, args);
             case "setnpc" -> definirNpc(sender);
+            case "natal" -> natal(sender);
             case "status" -> plugin.ok(sender, plugin.statusTexto());
             default -> uso(sender);
         }
@@ -63,6 +64,12 @@ final class EventoCommand implements CommandExecutor, TabCompleter {
         plugin.definirNpc(jogador);
     }
 
+    private void natal(CommandSender sender) {
+        if (plugin.natal() != null) {
+            plugin.natal().ajuda(sender);
+        }
+    }
+
     private void uso(CommandSender sender) {
         plugin.erro(sender, "Uso: /event <on|off|time <2h5m53s|cancel>|setnpc|status>");
     }
@@ -70,7 +77,7 @@ final class EventoCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
-            return filtrar(List.of("on", "off", "time", "setnpc", "status"), args[0]);
+            return filtrar(List.of("on", "off", "time", "setnpc", "status", "natal"), args[0]);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("time")) {
             return filtrar(List.of("cancel", "30m", "1h", "1h30m"), args[1]);
