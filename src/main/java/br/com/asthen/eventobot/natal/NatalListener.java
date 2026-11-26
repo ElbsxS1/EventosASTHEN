@@ -85,6 +85,7 @@ final class NatalListener implements Listener {
     @EventHandler
     public void aoSairDoServidor(PlayerQuitEvent e) {
         Player p = e.getPlayer();
+        m.restaurarAtravessar(p);
         if (m.noEventoAgora(p.getUniqueId())) {
             m.sair(p, true);
         }

@@ -411,6 +411,29 @@ public final class NatalModule {
         }
     }
 
+    private final Map<UUID, org.bukkit.GameMode> modoAnterior = new HashMap<>();
+
+    /** Admin: alterna o modo espectador para atravessar barreiras e blocos; volta ao modo anterior. */
+    boolean alternarAtravessar(Player p) {
+        org.bukkit.GameMode antes = modoAnterior.remove(p.getUniqueId());
+        if (antes != null) {
+            p.setGameMode(antes);
+            return false;
+        }
+        modoAnterior.put(p.getUniqueId(), p.getGameMode() == org.bukkit.GameMode.SPECTATOR
+                ? org.bukkit.GameMode.CREATIVE : p.getGameMode());
+        p.setGameMode(org.bukkit.GameMode.SPECTATOR);
+        return true;
+    }
+
+    /** Ao desconectar, o admin não fica preso no modo espectador. */
+    void restaurarAtravessar(Player p) {
+        org.bukkit.GameMode antes = modoAnterior.remove(p.getUniqueId());
+        if (antes != null) {
+            p.setGameMode(antes);
+        }
+    }
+
     /** Ao sair do evento: volta a ver todos e a ser visto por todos. */
     void mostrarTodos(Player p) {
         for (Player outro : Bukkit.getOnlinePlayers()) {

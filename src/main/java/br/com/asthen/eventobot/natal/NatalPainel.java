@@ -114,6 +114,7 @@ final class NatalPainel {
         colocar(inv, 49, Material.BOOK, "§bLista de times", "§7Clique: mostra no chat");
         colocar(inv, 51, Material.PLAYER_HEAD, "§dJogadores: resetar / remover do time",
                 "§7Tirar do espectador ou do time", "§7Clique para abrir a lista");
+        colocar(inv, 52, Material.FEATHER, "§bAtravessar barreiras", "§7Liga/desliga o modo espectador", "§7para você passar por blocos");
         colocar(inv, 53, Material.ARROW, "§7Fechar");
         p.openInventory(inv);
     }
@@ -161,6 +162,11 @@ final class NatalPainel {
             case 49 -> p.performCommand("natal times");
             case 51 -> {
                 abrirJogadores(p);
+                return;
+            }
+            case 52 -> {
+                m.enviar(p, m.alternarAtravessar(p) ? "§aAtravessar ligado (espectador)." : "§aAtravessar desligado.");
+                p.closeInventory();
                 return;
             }
             case 53 -> {
