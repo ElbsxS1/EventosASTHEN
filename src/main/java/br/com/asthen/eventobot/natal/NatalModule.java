@@ -128,6 +128,7 @@ public final class NatalModule {
                 placar.remover(p);
                 normalizar(p);
                 inventarios.restaurar(p);
+                mostrarTodos(p);
             }
         }
         noEvento.clear();
@@ -373,6 +374,51 @@ public final class NatalModule {
 
     void atualizarVisual() {
         placar.atualizarTodos();
+        atualizarVisibilidade();
+    }
+
+    private boolean lutador(UUID id) {
+        Participante pt = participantes.get(id);
+        return pt != null && pt.naRodada && pt.status == Status.ATIVO;
+    }
+
+    /**
+     * Durante a rodada, quem está lutando só enxerga quem também está lutando: espectadores, eliminados e
+     * quem espera no lobby ficam invisíveis para eles (mesmo estando sobre a arena). Fora da rodada todos
+     * se veem normalmente.
+     */
+    void atualizarVisibilidade() {
+        List<Player> noEv = new ArrayList<>();
+        for (UUID id : noEvento) {
+            Player p = Bukkit.getPlayer(id);
+            if (p != null && p.isOnline()) {
+                noEv.add(p);
+            }
+        }
+        boolean rodada = estado.emRodada();
+        for (Player viewer : noEv) {
+            boolean viewerLuta = rodada && lutador(viewer.getUniqueId());
+            for (Player alvo : noEv) {
+                if (alvo.equals(viewer)) {
+                    continue;
+                }
+                if (viewerLuta && !lutador(alvo.getUniqueId())) {
+                    viewer.hidePlayer(plugin, alvo);
+                } else {
+                    viewer.showPlayer(plugin, alvo);
+                }
+            }
+        }
+    }
+
+    /** Ao sair do evento: volta a ver todos e a ser visto por todos. */
+    void mostrarTodos(Player p) {
+        for (Player outro : Bukkit.getOnlinePlayers()) {
+            if (!outro.equals(p)) {
+                p.showPlayer(plugin, outro);
+                outro.showPlayer(plugin, p);
+            }
+        }
     }
 
     // ------------------------------------------------------------------ itens
@@ -596,6 +642,7 @@ public final class NatalModule {
         placar.remover(p);
         normalizar(p);
         inventarios.restaurar(p);
+        mostrarTodos(p);
         saidaLiberada.remove(id);
         atualizarVisual();
     }
