@@ -24,7 +24,7 @@ final class NatalComando implements CommandExecutor, TabCompleter {
     private static final String ADMIN = "eventobot.natal.admin";
 
     private static final List<String> ADMIN_SUBS = List.of(
-            "painel", "setranking", "removeranking", "iniciar", "amarelo", "vermelho", "verde", "azul", "preparar", "liberar", "status", "times",
+            "painel", "item", "setranking", "removeranking", "iniciar", "amarelo", "vermelho", "verde", "azul", "preparar", "liberar", "status", "times",
             "participantes", "ativos", "espectadores", "encerrarrodada", "cancelarrodada", "cancelar",
             "encerrar", "remover", "resetar", "setlobby", "setentrada", "setspawn", "setespectador", "zerarranking");
     private static final List<String> JOGADOR_SUBS = List.of("ajuda", "sair", "ranking", "time");
@@ -47,6 +47,7 @@ final class NatalComando implements CommandExecutor, TabCompleter {
         }
         s.sendMessage(NatalModule.texto("§c§lAdministração:"));
         s.sendMessage(NatalModule.texto("§e/natal painel §7- painel de administração (tudo em botões)"));
+        s.sendMessage(NatalModule.texto("§e/natal item §7- recebe a estrela que abre o painel (botão direito)"));
         s.sendMessage(NatalModule.texto("§e/natal setranking|removeranking §7- ranking flutuante no lobby"));
         s.sendMessage(NatalModule.texto("§e/natal iniciar §7- abre a escolha de times"));
         s.sendMessage(NatalModule.texto("§e/natal <cor> local <1|2> §7- escolhe o time de cada local (ex.: /natal amarelo local 1)"));
@@ -148,6 +149,14 @@ final class NatalComando implements CommandExecutor, TabCompleter {
             case "painel" -> {
                 if (s instanceof Player pl) {
                     m.painel.abrir(pl);
+                } else {
+                    m.enviar(s, "§cUse dentro do jogo.");
+                }
+            }
+            case "item" -> {
+                if (s instanceof Player pl) {
+                    pl.getInventory().addItem(m.itemPainel());
+                    m.enviar(s, "§aItem do painel entregue. Clique direito com ele para abrir.");
                 } else {
                     m.enviar(s, "§cUse dentro do jogo.");
                 }

@@ -317,6 +317,18 @@ final class NatalListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     public void aoInteragir(PlayerInteractEvent e) {
         Player p = e.getPlayer();
+        if ("painel".equals(tag(e.getItem()))) {
+            boolean dir = e.getAction() == Action.RIGHT_CLICK_AIR || e.getAction() == Action.RIGHT_CLICK_BLOCK;
+            if (dir && e.getHand() == org.bukkit.inventory.EquipmentSlot.HAND) {
+                e.setCancelled(true);
+                if (m.admin(p)) {
+                    m.painel.abrir(p);
+                } else {
+                    p.getInventory().setItemInMainHand(null);
+                }
+            }
+            return;
+        }
         if (!m.restrito(p)) {
             return;
         }

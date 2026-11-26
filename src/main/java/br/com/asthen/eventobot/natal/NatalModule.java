@@ -393,6 +393,10 @@ public final class NatalModule {
         return it;
     }
 
+    ItemStack itemPainel() {
+        return item(Material.NETHER_STAR, "§c§lPainel do Natal", "painel", "§7Clique direito: abre o painel de administração");
+    }
+
     ItemStack itemMenu() {
         return item(Material.NETHER_STAR, "§6§lEscolher time", "menu",
                 "§7Clique com o botão direito", "§7para escolher a sua equipe.");
